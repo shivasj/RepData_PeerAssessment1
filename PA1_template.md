@@ -20,6 +20,10 @@ library(dplyr)
 ##     intersect, setdiff, setequal, union
 ```
 
+```r
+library(lattice)
+```
+
 ## Loading and preprocessing the data
 Load the data and process/transform the data for analysis
 
@@ -69,7 +73,6 @@ Ignore the missing values in the dataset
 
 ```r
   meanSteps<-tapply(activityData$steps,activityData$interval,mean,na.rm=TRUE)
-  
   plot(meanSteps,unique(activityData$nterval),type="l",xlab="5 minute interval",ylab="Average steps taken across all days")
 ```
 
@@ -179,15 +182,22 @@ instead of "na" has caused the total daily number of steps to increase
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
 ```r
-    weekday<-activityDataNew[activityDataNew$dayType=="weekday",]
-    weekend<-activityDataNew[activityDataNew$dayType=="weekend",]
-
-    averageWeekday<-tapply(weekday$steps,weekday$interval,mean)
-    averageWeekend<-tapply(weekend$steps,weekend$interval,mean)
-
-    par(mfrow=c(2,1),mar=c(2,2,1,1))
-    plot(unique(weekend$interval),averageWeekend,main="Weekend",type="l",xlab="Interval",ylab="Number of Steps")
-    plot(unique(weekday$interval),averageWeekday,main="Weekday",type="l",xlab="Interval",ylab="Number of Steps")
+    averageSteps <- vector()
+    averageIntervals <- vector()
+    averageWeekType <- vector()
+    for(i in unique(activityDataNew$interval))
+    {
+      for(t in levels(activityDataNew$dayType))
+      {
+        averageSteps <- append(averageSteps 
+                               , mean(activityDataNew$steps[activityDataNew$interval == i & activityDataNew$dayType== t]))
+        averageIntervals <- append( averageIntervals , i)
+        averageWeekType <- append(averageWeekType , t)
+      }
+    }
+    xyplot(averageSteps ~ averageIntervals | averageWeekType
+           ,main="Panel Plot of Steps by Interval for Weekend/Weekday"
+           ,xlab = "Intervals" , ylab = "Number of steps"  , type='l' , layout = c(1,2))
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
